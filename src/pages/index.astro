@@ -1,50 +1,987 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// Featured articles for sidebar (exact from Trivago)
+const featuredArticles = [
+	{ title: "Implementing Data Validation with Great Expectations in Hybrid Environments", date: "25 Apr 2023", readTime: "6 min read" },
+	{ title: "How we scaled our Prometheus setup", date: "23 Aug 2022", readTime: "9 min read" },
+	{ title: "Being on-call as a software engineer - a challenging and fast learning experience", date: "12 Jan 2022", readTime: "8 min read" },
+	{ title: "Java Reactive Programming - Effective Usage in a Real World Application", date: "16 Mar 2021", readTime: "15 min read" },
+	{ title: "Learn Redis the hard way (in production)", date: "25 Jan 2017", readTime: "18 min read" }
+];
+
+// Popular tags (exact from Trivago)
+const popularTags = ['github', 'java', 'automation', 'monitoring', 'open source', 'data'];
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<BaseHead title="Tech at trivago" description="trivago's latest tech articles and regular tech tips straight to your inbox!" />
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+				margin: 0;
+				padding: 0;
+				background: #ffffff;
+				color: #333;
+				line-height: 1.5;
+			}
+			
+			/* Header styles */
+			.header {
+				background: white;
+				border-bottom: 1px solidrgb(255, 255, 255);
+				padding: 0;
+			}
+			.header-content {
+				max-width: 1200px;
+				margin: 0 auto;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 12px 20px;
+			}
+			.logo {
+				color: #ff6b35;
+				font-size: 24px;
+				font-weight: bold;
+				text-decoration: none;
+			}
+			.nav {
+				display: flex;
+				align-items: center;
+				gap: 32px;
+			}
+			.nav a {
+				color: #666;
+				text-decoration: none;
+				font-size: 14px;
+				font-weight: 500;
+			}
+			.nav a:hover {
+				color: #333;
+			}
+			.dropdown {
+				position: relative;
+				display: inline-block;
+			}
+			.dropdown-content {
+				display: none;
+				position: absolute;
+				top: 100%;
+				left: 0;
+				background: white;
+				min-width: 200px;
+				box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+				border: 1px solid #e5e5e5;
+				border-radius: 4px;
+				z-index: 1000;
+				padding: 8px 0;
+				margin-top: 4px;
+			}
+			.dropdown:hover .dropdown-content {
+				display: block;
+			}
+			.dropdown-content a {
+				color: #666;
+				padding: 8px 16px;
+				text-decoration: none;
+				display: block;
+				font-size: 14px;
+				transition: background-color 0.2s ease;
+			}
+			.dropdown-content a:hover {
+				background-color:rgb(255, 255, 255);
+				color: #333;
+			}
+			.social-icons {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.social-icons span {
+				font-size: 12px;
+				color: #666;
+				margin-right: 8px;
+			}
+			.social-icon {
+				width: 24px;
+				height: 24px;
+				background: #666;
+				border-radius: 50%;
+				display: inline-block;
+			}
+			
+			/* Main content */
+			.main-container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 40px 20px;
+				display: grid;
+				grid-template-columns: 1fr 300px;
+				gap: 60px;
+			}
+			
+			/* VPN Hero Section */
+			.vpn-hero-section {
+				background: linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%);
+				padding: 80px 0;
+				margin: 0;
+				min-height: 70vh;
+				display: flex;
+				align-items: center;
+				width: 100vw;
+				margin-left: calc(-50vw + 50%);
+			}
+			
+			.vpn-hero-container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 0 20px;
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 60px;
+				align-items: center;
+			}
+			
+			.vpn-hero-content {
+				max-width: 500px;
+			}
+			
+			.rating-badge {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				margin-bottom: 24px;
+				font-size: 14px;
+				color: #666;
+			}
+			
+			.star {
+				color: #ff6b35;
+				font-size: 16px;
+			}
+			
+			.techradar {
+				color: #007bff;
+				font-weight: 600;
+			}
+			
+			.vpn-hero-title {
+				font-size: 48px;
+				font-weight: 800;
+				line-height: 1.1;
+				color: #2c3e50;
+				margin: 0 0 32px 0;
+				letter-spacing: -0.02em;
+			}
+			
+			.title-highlight {
+				color: #007bff;
+			}
+			
+			.feature-list {
+				list-style: none;
+				padding: 0;
+				margin: 0 0 32px 0;
+			}
+			
+			.feature-item {
+				display: flex;
+				align-items: flex-start;
+				gap: 12px;
+				margin-bottom: 16px;
+				font-size: 16px;
+				color: #555;
+				line-height: 1.5;
+			}
+			
+			.checkmark {
+				color: #28a745;
+				font-weight: bold;
+				font-size: 18px;
+				margin-top: 2px;
+			}
+			
+			.offer-box {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				background:rgb(255, 255, 255);
+				border: 1px solid #e9ecef;
+				border-radius: 12px;
+				padding: 16px;
+				margin-bottom: 32px;
+				font-size: 14px;
+				color: #495057;
+			}
+			
+			.offer-icon {
+				font-size: 20px;
+			}
+			
+			.vpn-cta-button {
+				background: #ff4757;
+				color: white;
+				border: none;
+				padding: 16px 32px;
+				font-size: 16px;
+				font-weight: 600;
+				border-radius: 8px;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+			}
+			
+			.vpn-cta-button:hover {
+				background: #ff3742;
+				transform: translateY(-2px);
+				box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+			}
+			
+			.vpn-hero-visual {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			
+			.phone-mockup {
+				width: 300px;
+				height: 600px;
+				background: #000;
+				border-radius: 30px;
+				padding: 8px;
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+				position: relative;
+			}
+			
+			.phone-screen {
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				border-radius: 22px;
+				padding: 20px;
+				color: white;
+				position: relative;
+				overflow: hidden;
+			}
+			
+			.phone-header {
+				margin-bottom: 30px;
+			}
+			
+			.status-bar {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 20px;
+				font-size: 14px;
+				font-weight: 600;
+			}
+			
+			.app-header {
+				text-align: center;
+			}
+			
+			.connected-status {
+				color: #4CAF50;
+				font-size: 14px;
+				font-weight: 600;
+			}
+			
+			.security-status {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin-bottom: 30px;
+				padding: 16px;
+				background: rgba(255, 255, 255, 0.1);
+				border-radius: 12px;
+			}
+			
+			.shield-icon {
+				font-size: 24px;
+			}
+			
+			.status-title {
+				font-size: 12px;
+				opacity: 0.8;
+				margin-bottom: 4px;
+			}
+			
+			.status-value {
+				font-size: 16px;
+				font-weight: 600;
+			}
+			
+			.world-map {
+				height: 120px;
+				margin-bottom: 30px;
+				background: rgba(255, 255, 255, 0.1);
+				border-radius: 12px;
+				padding: 20px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			
+			.map-svg {
+				width: 100%;
+				height: 80px;
+			}
+			
+			.location-info {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin-bottom: 20px;
+				padding: 12px;
+				background: rgba(255, 255, 255, 0.1);
+				border-radius: 8px;
+			}
+			
+			.flag {
+				font-size: 20px;
+			}
+			
+			.location-text {
+				flex: 1;
+			}
+			
+			.country {
+				font-size: 14px;
+				font-weight: 600;
+				margin-bottom: 2px;
+			}
+			
+			.city {
+				font-size: 12px;
+				opacity: 0.8;
+			}
+			
+			.disconnect-btn {
+				background: #ff4757;
+				color: white;
+				border: none;
+				padding: 6px 12px;
+				font-size: 12px;
+				border-radius: 4px;
+				cursor: pointer;
+			}
+			
+			.server-flags {
+				display: flex;
+				justify-content: center;
+				gap: 8px;
+				margin-top: 20px;
+			}
+			
+			.flag-icon {
+				font-size: 16px;
+				opacity: 0.7;
+			}
+			
+			/* Articles Section Full Width */
+			.articles-section {
+				width: 100vw;
+				margin-left: calc(-50vw + 50%);
+				padding: 60px 0;
+				background: #ffffff;
+			}
+			
+			.articles-section .section-header,
+			.articles-section .articles-grid {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 0 20px;
+			}
+			
+			/* Latest articles section */
+			.section-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 30px;
+			}
+			.section-title {
+				font-size: 24px;
+				font-weight: 600;
+				color:rgb(0, 0, 0);
+				margin: 0;
+			}
+			.see-all {
+				color: #4a9eff;
+				text-decoration: none;
+				font-size: 14px;
+				font-weight: 500;
+			}
+			.see-all:hover {
+				text-decoration: underline;
+			}
+			
+			/* Article cards */
+			.articles-grid {
+				display: grid;
+				gap: 40px;
+			}
+			.article-card {
+				display: grid;
+				grid-template-columns: 200px 1fr;
+				gap: 20px;
+				text-decoration: none;
+				color: inherit;
+			}
+			.article-card:hover .article-title {
+				color: #4a9eff;
+			}
+			.article-image {
+				height: 200px;
+				border-radius: 8px 8px 0 0;
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background-size: cover;
+				background-position: center;
+				background-repeat: no-repeat;
+			}
+			.article-image.pink {
+				background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%), url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+				background-blend-mode: overlay;
+			}
+			.article-image.blue {
+				background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%), url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+				background-blend-mode: overlay;
+			}
+			.article-image.purple {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%), url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80');
+				background-blend-mode: overlay;
+			}
+			.article-illustration {
+				position: absolute;
+				bottom: 10px;
+				right: 10px;
+				width: 80px;
+				height: 80px;
+				background: rgba(255,255,255,0.2);
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 24px;
+			}
+			.article-content h3 {
+				font-size: 20px;
+				font-weight: 600;
+				margin: 0 0 8px 0;
+				line-height: 1.3;
+				color:rgb(0, 0, 0);
+			}
+			.article-title {
+				transition: color 0.2s ease;
+			}
+			.article-tags {
+				display: flex;
+				gap: 8px;
+				margin-bottom: 12px;
+			}
+			.tag {
+				background: #007bff;
+				color: white;
+				padding: 4px 10px;
+				border-radius: 12px;
+				font-size: 11px;
+				font-weight: 600;
+			}
+			.tag.green {
+				background: #28a745;
+			}
+			.article-excerpt {
+				font-size: 14px;
+				line-height: 1.5;
+				color: #666;
+				margin-bottom: 12px;
+			}
+			.article-meta {
+				font-size: 13px;
+				color: #999;
+			}
+			
+			/* Sidebar */
+			.sidebar {
+				padding-left: 40px;
+				margin-top: 120px;
+			}
+			.sidebar-section {
+				margin-bottom: 50px;
+			}
+			.sidebar-section h3 {
+				font-size: 18px;
+				font-weight: 600;
+				color: #666;
+				margin: 0 0 20px 0;
+				border-bottom: 1px solid #e5e5e5;
+				padding-bottom: 8px;
+			}
+			.featured-article {
+				margin-bottom: 20px;
+				padding-bottom: 20px;
+				border-bottom: 1px solid #f0f0f0;
+			}
+			.featured-article:last-child {
+				border-bottom: none;
+			}
+			.featured-article h4 {
+				font-size: 14px;
+				font-weight: 600;
+				margin: 0 0 8px 0;
+				line-height: 1.3;
+				color: #333;
+			}
+			.featured-article a {
+				text-decoration: none;
+				color: inherit;
+			}
+			.featured-article a:hover h4 {
+				color: #007bff;
+			}
+			.featured-meta {
+				font-size: 12px;
+				color: #999;
+			}
+			
+			/* Popular tags */
+			.tags-grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 8px;
+			}
+			.tag-item {
+				background: #f8f9fa;
+				padding: 8px 12px;
+				border-radius: 4px;
+				text-align: center;
+				font-size: 12px;
+				color: #666;
+				text-decoration: none;
+				transition: all 0.2s ease;
+			}
+			.tag-item:hover {
+				background: #007bff;
+				color: white;
+			}
+			.see-all-tags {
+				grid-column: span 3;
+				text-align: right;
+				margin-top: 8px;
+			}
+			
+			/* Career section */
+			.career-section {
+				background: #f8f9fa;
+				padding: 30px;
+				border-radius: 8px;
+				text-align: left;
+			}
+			.career-section h3 {
+				font-size: 24px;
+				font-weight: 700;
+				color: #333;
+				margin: 0 0 15px 0;
+				border: none;
+				padding: 0;
+			}
+			.career-section p {
+				font-size: 14px;
+				line-height: 1.6;
+				color: #666;
+				margin-bottom: 20px;
+			}
+			.career-cta {
+				color: #007bff;
+				text-decoration: none;
+				font-weight: 600;
+				font-size: 14px;
+			}
+			.career-cta:hover {
+				text-decoration: underline;
+			}
+			
+			/* Tech Gallery */
+			.tech-gallery {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 12px;
+				margin-top: 16px;
+			}
+			
+			.gallery-item {
+				position: relative;
+				border-radius: 8px;
+				overflow: hidden;
+				transition: transform 0.2s ease;
+			}
+			
+			.gallery-item:hover {
+				transform: scale(1.05);
+			}
+			
+			.gallery-item img {
+				width: 100%;
+				height: 80px;
+				object-fit: cover;
+				display: block;
+			}
+			
+			.gallery-caption {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				background: linear-gradient(transparent, rgba(0,0,0,0.7));
+				color: white;
+				padding: 8px 6px 4px;
+				font-size: 11px;
+				font-weight: 500;
+				text-align: center;
+			}
+			
+			/* Newsletter Section */
+			.newsletter-section {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				color: white;
+				padding: 24px;
+				border-radius: 12px;
+				text-align: center;
+			}
+			
+			.newsletter-icon {
+				font-size: 32px;
+				margin-bottom: 12px;
+			}
+			
+			.newsletter-section h3 {
+				margin: 0 0 8px 0;
+				color: white;
+			}
+			
+			.newsletter-section p {
+				margin: 0 0 16px 0;
+				font-size: 14px;
+				color: rgba(255, 255, 255, 0.9);
+			}
+			
+			.newsletter-form {
+				display: flex;
+				gap: 8px;
+				flex-direction: column;
+			}
+			
+			.newsletter-form input {
+				padding: 10px 12px;
+				border: none;
+				border-radius: 6px;
+				font-size: 14px;
+				outline: none;
+			}
+			
+			.newsletter-form button {
+				padding: 10px 16px;
+				background: white;
+				color: #667eea;
+				border: none;
+				border-radius: 6px;
+				font-size: 14px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s ease;
+			}
+			
+			.newsletter-form button:hover {
+				background: #f8f9fa;
+				transform: translateY(-1px);
+			}
+			
+			/* Hero Responsive */
+			@media (max-width: 1024px) {
+				.hero-container {
+					grid-template-columns: 1fr;
+					gap: 40px;
+					text-align: center;
+				}
+				
+				.hero-title {
+					font-size: 48px;
+				}
+			}
+			
+			@media (max-width: 768px) {
+				.hero-section {
+					min-height: 60vh;
+				}
+				
+				.hero-container {
+					padding: 0 20px;
+				}
+				
+				.hero-title {
+					font-size: 36px;
+				}
+				
+				.hero-actions {
+					flex-direction: column;
+					align-items: center;
+					gap: 12px;
+				}
+				
+				.hero-stats {
+					justify-content: center;
+					gap: 24px;
+				}
+				
+				.visual-container {
+					height: 300px;
+				}
+				
+				.main-visual {
+					width: 200px;
+					height: 200px;
+				}
+			}
+			
+			/* Responsive */
+			@media (max-width: 768px) {
+				.main-container {
+					grid-template-columns: 1fr;
+					gap: 40px;
+					padding: 20px;
+				}
+				.hero-article {
+					flex-direction: column;
+					text-align: center;
+				}
+				.hero-title {
+					font-size: 32px;
+				}
+				.article-card {
+					grid-template-columns: 1fr;
+				}
+				.article-image {
+					width: 100%;
+					height: 200px;
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
+
+		<div class="main-container">
+			<main>
+				<!-- VPN Service Hero Section -->
+			<section class="vpn-hero-section">
+				<div class="vpn-hero-container">
+					<div class="vpn-hero-content">
+						<!-- Rating Badge -->
+						<div class="rating-badge">
+							<span class="star">★</span>
+							<span class="rating-text"
+							<span class="techradar">IET Connect</span>
+						</div>
+						
+						<!-- Main Headline -->
+						<h1 class="vpn-hero-title">
+							IET Connect för<br>
+							Tech insight.<br>
+						</h1>
+						
+						<!-- Feature List -->
+						<ul class="feature-list">
+							<li class="feature-item">
+								<span class="checkmark">✓</span>
+								<span>Open Source prjekt.</span>
+							</li>
+							<li class="feature-item">
+								<span class="checkmark">✓</span>
+								<span>Bloggar, aritklar och guider inom tech</span>
+							</li>
+
+						</ul>
+						
+						<!-- Offer Box -->
+						<div class="offer-box">
+							<div class="offer-icon"></div>
+							<div class="offer-text">
+								<strong>1000+ artiklar och guider :</strong> helt gratis hos IET Connect där du lära dig allt om tech!
+							</div>
+						</div>
+						
+					
+					</div>
+					
+					<!-- Mobile Device Mockup -->
+					<div class="vpn-hero-visual">
+						<div class="phone-mockup">
+							<div class="phone-screen">
+								<div class="phone-header">
+									<div class="status-bar">
+										<span class="time">9:41</span>
+										<div class="signal-icons"></div>
+									</div>
+									<div class="app-header">
+										<span class="connected-status">● IET Connect</span>
+									</div>
+								</div>
+								<div class="phone-content">
+									<div class="security-status">
+										<div class="shield-icon">📚</div>
+										<div class="status-text">
+											<div class="status-title">Lästa artiklar</div>
+											<div class="status-value">50</div>
+										</div>
+									</div>
+									<div class="world-map">
+										<!-- Simplified world map with connection points -->
+										<svg viewBox="0 0 300 200" class="map-svg">
+											<circle cx="50" cy="80" r="3" fill="#4CAF50" />
+											<circle cx="120" cy="60" r="3" fill="#2196F3" />
+											<circle cx="180" cy="90" r="3" fill="#FF9800" />
+											<circle cx="220" cy="70" r="3" fill="#E91E63" />
+											<circle cx="160" cy="120" r="3" fill="#9C27B0" />
+										</svg>
+									</div>
+									<div class="location-info">
+										<div class="flag"></div>
+										<div class="location-text">
+											<div class="country">Aktuellt</div>
+											<div class="city">Strata  SQL Server</div>
+										</div>
+										<button class="disconnect-btn">Läs nu</button>
+									</div>
+									<div class="server-flags">
+										<span class="flag-icon">🇨🇦</span>
+										<span class="flag-icon">🇬🇧</span>
+										<span class="flag-icon">🇩🇪</span>
+										<span class="flag-icon">🇯🇵</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+				<!-- Latest Articles -->
+				<section class="articles-section">
+					<div class="section-header">
+						<h2 class="section-title">Latest articles</h2>
+						<a href="/blog" class="see-all">See all ›</a>
+					</div>
+					<div class="articles-grid">
+						<article class="article-card">
+							<div class="article-image pink">
+								<div class="article-illustration">👨‍💼</div>
+							</div>
+							<div class="article-content">
+								<div class="article-tags">
+									<span class="tag">Site Reliability Engineering</span>
+									<span class="tag green">Engineering Culture</span>
+								</div>
+								<h3 class="article-title">Life of SRE as a Salesperson</h3>
+								<p class="article-excerpt">
+									If you are a Developer or a Product person, you might have this feeling of achievement when you work on a specific product. When it's launched successfully in the market, you see people start using something built by you. You become...
+								</p>
+								<div class="article-meta">
+									Anis Khan · 17 Mar 2025 · 12 min read
+								</div>
+							</div>
+						</article>
+
+						<article class="article-card">
+							<div class="article-image blue">
+								<div class="article-illustration">📊</div>
+							</div>
+							<div class="article-content">
+								<div class="article-tags">
+									<span class="tag">Data Science</span>
+								</div>
+								<h3 class="article-title">How we aggregate 70 billion prices to show price context to our users</h3>
+								<p class="article-excerpt">
+									Price comparison is one of the key value propositions of trivago, and in doing so, we handle billions of prices everyday to provide our users with the most accurate and up to date price as possible. We can leverage this enormous amount of...
+								</p>
+								<div class="article-meta">
+									Santiago Bohorquez Suarez · 13 Feb 2025 · 11 min read
+								</div>
+							</div>
+						</article>
+
+						<article class="article-card">
+							<div class="article-image purple">
+								<div class="article-illustration">🔧</div>
+							</div>
+							<div class="article-content">
+								<div class="article-tags">
+									<span class="tag">Frontend</span>
+									<span class="tag green">Engineering</span>
+								</div>
+								<h3 class="article-title">How We Build: Behind the Frontend of trivago's Website</h3>
+								<p class="article-excerpt">
+									In this article, we'll take you behind the scenes of trivago's frontend development process. From our tech stack choices to our deployment strategies, discover how we build and maintain one of the world's largest travel platforms...
+								</p>
+								<div class="article-meta">
+									Frontend Team · 27 Jan 2025 · 8 min read
+								</div>
+							</div>
+						</article>
+					</div>
+				</section>
+			</main>
+
+			<!-- Sidebar -->
+			<aside class="sidebar">
+				<!-- Featured Articles -->
+				<div class="sidebar-section">
+					<h3>Featured articles</h3>
+					{featuredArticles.map((article) => (
+						<div class="featured-article">
+							<a href="#">
+								<h4>{article.title}</h4>
+								<div class="featured-meta">{article.date} · {article.readTime}</div>
+							</a>
+						</div>
+					))}
+				</div>
+
+				<!-- Popular Tags -->
+				<div class="sidebar-section">
+					<h3>Popular tags</h3>
+					<div class="tags-grid">
+						{popularTags.map((tag) => (
+							<a href="#" class="tag-item">{tag}</a>
+						))}
+						<div class="see-all-tags">
+							<a href="#" class="see-all" ›</a>
+						</div>
+					</div>
+				</div>
+
+
+
+
+			</aside>
+		</div>
+
 		<Footer />
 	</body>
 </html>

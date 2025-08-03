@@ -1,9 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -410,20 +410,39 @@ const popularTags = ['github', 'java', 'automation', 'monitoring', 'open source'
 		</style>
 	</head>
 	<body>
-		<Header />
+		<!-- Header -->
+		<header class="header">
+			<div class="header-content">
+				<a href="/" class="logo">trivago</a>
+				<nav class="nav">
+					<a href="/">Tech at trivago</a>
+					<a href="/topics">Topics ▼</a>
+					<a href="/about">About</a>
+					<a href="/careers">Careers</a>
+					<a href="/opensource">Open Source</a>
+				</nav>
+				<div class="social-icons">
+					<span>Follow us on</span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+				</div>
+			</div>
+		</header>
 
 		<div class="main-container">
 			<main>
 				<!-- Hero Article -->
 				<article class="hero-article">
 					<div class="hero-content">
-						<div class="hero-tag">{posts[0]?.data.category || 'Tech'}</div>
-						<h1 class="hero-title">{posts[0]?.data.title || 'Latest Tech Article'}</h1>
+						<div class="hero-tag">Quality Assurance</div>
+						<h1 class="hero-title">Tailor-made browser extensions for increased testing efficiency</h1>
 						<p class="hero-description">
-							{posts[0]?.data.description || 'Discover the latest insights from our engineering team...'}
+							When doing exploratory testing on a web application, the nature of activities involves discovering things and not repeating the same patterns. However, there might be aspects that could be improved by specific tools without trespassing into the realm of test automation. Can coding skills help testing activities, beyo...
 						</p>
 						<div class="hero-meta">
-							{posts[0]?.data.author || 'IET Connect Team'} · <FormattedDate date={posts[0]?.data.pubDate || new Date()} /> · {posts[0]?.data.readTime || '5 min read'}
+							Raymond Saba , Giuseppe Donati · 23 Apr 2025 · 8 min read
 						</div>
 					</div>
 					<div class="hero-illustration">
@@ -441,30 +460,61 @@ const popularTags = ['github', 'java', 'automation', 'monitoring', 'open source'
 						<a href="/blog" class="see-all">See all ›</a>
 					</div>
 					<div class="articles-grid">
-						{posts.slice(1, 4).map((post, index) => (
-							<a href={`/blog/${post.id}/`} class="article-card">
-								<div class={`article-image ${index === 0 ? 'pink' : index === 1 ? 'blue' : 'purple'}`}>
-									<div class="article-illustration">
-										{index === 0 ? '👨‍💼' : index === 1 ? '📊' : '🔧'}
-									</div>
+						<article class="article-card">
+							<div class="article-image pink">
+								<div class="article-illustration">👨‍💼</div>
+							</div>
+							<div class="article-content">
+								<div class="article-tags">
+									<span class="tag">Site Reliability Engineering</span>
+									<span class="tag green">Engineering Culture</span>
 								</div>
-								<div class="article-content">
-									<div class="article-tags">
-										<span class="tag">{post.data.category}</span>
-										{post.data.tags && post.data.tags[0] && (
-											<span class="tag green">{post.data.tags[0]}</span>
-										)}
-									</div>
-									<h3 class="article-title">{post.data.title}</h3>
-									<p class="article-excerpt">
-										{post.data.description}
-									</p>
-									<div class="article-meta">
-										{post.data.author} · <FormattedDate date={post.data.pubDate} /> · {post.data.readTime || '5 min read'}
-									</div>
+								<h3 class="article-title">Life of SRE as a Salesperson</h3>
+								<p class="article-excerpt">
+									If you are a Developer or a Product person, you might have this feeling of achievement when you work on a specific product. When it's launched successfully in the market, you see people start using something built by you. You become...
+								</p>
+								<div class="article-meta">
+									Anis Khan · 17 Mar 2025 · 12 min read
 								</div>
-							</a>
-						))}
+							</div>
+						</article>
+
+						<article class="article-card">
+							<div class="article-image blue">
+								<div class="article-illustration">📊</div>
+							</div>
+							<div class="article-content">
+								<div class="article-tags">
+									<span class="tag">Data Science</span>
+								</div>
+								<h3 class="article-title">How we aggregate 70 billion prices to show price context to our users</h3>
+								<p class="article-excerpt">
+									Price comparison is one of the key value propositions of trivago, and in doing so, we handle billions of prices everyday to provide our users with the most accurate and up to date price as possible. We can leverage this enormous amount of...
+								</p>
+								<div class="article-meta">
+									Santiago Bohorquez Suarez · 13 Feb 2025 · 11 min read
+								</div>
+							</div>
+						</article>
+
+						<article class="article-card">
+							<div class="article-image purple">
+								<div class="article-illustration">🔧</div>
+							</div>
+							<div class="article-content">
+								<div class="article-tags">
+									<span class="tag">Frontend</span>
+									<span class="tag green">Engineering</span>
+								</div>
+								<h3 class="article-title">How We Build: Behind the Frontend of trivago's Website</h3>
+								<p class="article-excerpt">
+									In this article, we'll take you behind the scenes of trivago's frontend development process. From our tech stack choices to our deployment strategies, discover how we build and maintain one of the world's largest travel platforms...
+								</p>
+								<div class="article-meta">
+									Frontend Team · 27 Jan 2025 · 8 min read
+								</div>
+							</div>
+						</article>
 					</div>
 				</section>
 			</main>

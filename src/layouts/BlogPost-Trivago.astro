@@ -1,0 +1,368 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+
+type Props = CollectionEntry<'blog'>['data'];
+
+const { 
+  title, 
+  description, 
+  pubDate, 
+  updatedDate, 
+  heroImage,
+  keywords,
+  canonical,
+  ogTitle,
+  ogDescription,
+  ogImage,
+  ogUrl,
+  ogType = 'article',
+  author = 'IET Connect',
+  category,
+  tags
+} = Astro.props;
+
+// Generate canonical URL if not provided
+const canonicalUrl = canonical || `https://ietconnect.org${Astro.url.pathname}`;
+
+// Use ogTitle or fallback to title
+const openGraphTitle = ogTitle || `${title} | Tech at trivago`;
+
+// Use ogDescription or fallback to description
+const openGraphDescription = ogDescription || description;
+
+// Use ogImage or fallback to heroImage
+const openGraphImage = ogImage || heroImage || 'https://ietconnect.org/assets/img/logo.png';
+
+// Use ogUrl or fallback to canonical
+const openGraphUrl = ogUrl || canonicalUrl;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Primary Meta Tags -->
+		<title>{openGraphTitle}</title>
+		<meta name="title" content={openGraphTitle} />
+		<meta name="description" content={description} />
+		{keywords && <meta name="keywords" content={keywords} />}
+		<link rel="canonical" href={canonicalUrl} />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content={ogType} />
+		<meta property="og:url" content={openGraphUrl} />
+		<meta property="og:title" content={openGraphTitle} />
+		<meta property="og:description" content={openGraphDescription} />
+		<meta property="og:image" content={openGraphImage} />
+		<meta property="og:site_name" content="Tech at trivago" />
+		
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={openGraphUrl} />
+		<meta property="twitter:title" content={openGraphTitle} />
+		<meta property="twitter:description" content={openGraphDescription} />
+		<meta property="twitter:image" content={openGraphImage} />
+		
+		<!-- Favicon -->
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+				margin: 0;
+				padding: 0;
+				background: #ffffff;
+				color: #333;
+				line-height: 1.5;
+			}
+			
+			/* Header styles */
+			.header {
+				background: white;
+				border-bottom: 1px solid #e5e5e5;
+				padding: 0;
+			}
+			.header-content {
+				max-width: 1200px;
+				margin: 0 auto;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 12px 20px;
+			}
+			.logo {
+				color: #ff6b35;
+				font-size: 24px;
+				font-weight: bold;
+				text-decoration: none;
+			}
+			.nav {
+				display: flex;
+				align-items: center;
+				gap: 32px;
+			}
+			.nav a {
+				color: #666;
+				text-decoration: none;
+				font-size: 14px;
+				font-weight: 500;
+			}
+			.nav a:hover {
+				color: #333;
+			}
+			.social-icons {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.social-icons span {
+				font-size: 12px;
+				color: #666;
+				margin-right: 8px;
+			}
+			.social-icon {
+				width: 24px;
+				height: 24px;
+				background: #666;
+				border-radius: 50%;
+				display: inline-block;
+			}
+			
+			/* Article content */
+			.article-container {
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 40px 20px;
+			}
+			
+			.article-header {
+				text-align: center;
+				margin-bottom: 40px;
+				padding-bottom: 40px;
+				border-bottom: 1px solid #e5e5e5;
+			}
+			
+			.article-category {
+				background: #007bff;
+				color: white;
+				padding: 4px 12px;
+				border-radius: 16px;
+				font-size: 12px;
+				font-weight: 600;
+				display: inline-block;
+				margin-bottom: 20px;
+			}
+			
+			.article-title {
+				font-size: 48px;
+				font-weight: 900;
+				line-height: 1.1;
+				margin: 0 0 20px 0;
+				color: #333;
+			}
+			
+			.article-description {
+				font-size: 18px;
+				line-height: 1.6;
+				color: #666;
+				margin-bottom: 20px;
+			}
+			
+			.article-meta {
+				font-size: 14px;
+				color: #999;
+			}
+			
+			.article-content {
+				font-size: 16px;
+				line-height: 1.7;
+				color: #333;
+			}
+			
+			.article-content h2 {
+				font-size: 32px;
+				font-weight: 700;
+				margin: 40px 0 20px 0;
+				color: #333;
+			}
+			
+			.article-content h3 {
+				font-size: 24px;
+				font-weight: 600;
+				margin: 30px 0 15px 0;
+				color: #333;
+			}
+			
+			.article-content p {
+				margin-bottom: 20px;
+			}
+			
+			.article-content ul, .article-content ol {
+				margin: 20px 0;
+				padding-left: 30px;
+			}
+			
+			.article-content li {
+				margin-bottom: 8px;
+			}
+			
+			.article-content blockquote {
+				border-left: 4px solid #007bff;
+				padding-left: 20px;
+				margin: 30px 0;
+				font-style: italic;
+				color: #666;
+			}
+			
+			.article-content code {
+				background: #f8f9fa;
+				padding: 2px 6px;
+				border-radius: 4px;
+				font-size: 14px;
+				font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+			}
+			
+			.article-content pre {
+				background: #1f2937;
+				color: #f9fafb;
+				padding: 20px;
+				border-radius: 8px;
+				overflow-x: auto;
+				margin: 30px 0;
+			}
+			
+			.article-content pre code {
+				background: none;
+				padding: 0;
+				color: #f9fafb;
+			}
+			
+			.hero-image {
+				width: 100%;
+				margin: 40px 0;
+				text-align: center;
+			}
+			
+			.hero-image img {
+				max-width: 100%;
+				height: auto;
+				border-radius: 8px;
+				box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+			}
+			
+			.tags {
+				margin-top: 40px;
+				padding-top: 40px;
+				border-top: 1px solid #e5e5e5;
+				text-align: center;
+			}
+			
+			.tag {
+				background: #f8f9fa;
+				color: #666;
+				padding: 6px 12px;
+				border-radius: 20px;
+				font-size: 12px;
+				font-weight: 500;
+				margin: 0 4px 8px 0;
+				display: inline-block;
+			}
+			
+			@media (max-width: 768px) {
+				.header-content {
+					flex-direction: column;
+					gap: 20px;
+				}
+				
+				.nav {
+					gap: 20px;
+				}
+				
+				.social-icons {
+					display: none;
+				}
+				
+				.article-container {
+					padding: 20px 15px;
+				}
+				
+				.article-title {
+					font-size: 32px;
+				}
+				
+				.article-content h2 {
+					font-size: 24px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Trivago Header -->
+		<header class="header">
+			<div class="header-content">
+				<a href="/" class="logo">trivago</a>
+				<nav class="nav">
+					<a href="/">Tech at trivago</a>
+					<a href="/topics">Topics ▼</a>
+					<a href="/about">About</a>
+					<a href="/careers">Careers</a>
+					<a href="/opensource">Open Source</a>
+				</nav>
+				<div class="social-icons">
+					<span>Follow us on</span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+				</div>
+			</div>
+		</header>
+
+		<div class="article-container">
+			<article>
+				<header class="article-header">
+					{category && (
+						<div class="article-category">{category}</div>
+					)}
+					<h1 class="article-title">{title}</h1>
+					<p class="article-description">{description}</p>
+					<div class="article-meta">
+						{author} · <FormattedDate date={pubDate} />
+						{updatedDate && (
+							<>
+								 · Updated <FormattedDate date={updatedDate} />
+							</>
+						)}
+					</div>
+				</header>
+				
+				{heroImage && (
+					<div class="hero-image">
+						<img src={heroImage} alt={title} />
+					</div>
+				)}
+				
+				<div class="article-content">
+					<slot />
+				</div>
+				
+				{tags && tags.length > 0 && (
+					<div class="tags">
+						{tags.map((tag) => (
+							<span class="tag">{tag}</span>
+						))}
+					</div>
+				)}
+			</article>
+		</div>
+
+		<Footer />
+	</body>
+</html>

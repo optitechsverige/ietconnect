@@ -12,6 +12,20 @@ const blog = defineCollection({
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     heroImage: z.string().optional(),
+    // SEO and metadata fields
+    keywords: z.string().optional(),
+    canonical: z.string().optional(),
+    // Open Graph fields
+    ogTitle: z.string().optional(),
+    ogDescription: z.string().optional(),
+    ogImage: z.string().optional(),
+    ogUrl: z.string().optional(),
+    ogType: z.string().default('article'),
+    // Author information
+    author: z.string().default('IET Connect'),
+    // Article category/tags
+    category: z.string().optional(),
+    tags: z.array(z.string()).optional(),
   }),
 });
 

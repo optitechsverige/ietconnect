@@ -7,13 +7,155 @@ import FormattedDate from '../components/FormattedDate.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
----
+const { 
+  title, 
+  description, 
+  pubDate, 
+  updatedDate, 
+  heroImage,
+  keywords,
+  canonical,
+  ogTitle,
+  ogDescription,
+  ogImage,
+  ogUrl,
+  ogType = 'article',
+  author = 'IET Connect',
+  category,
+  tags
+} = Astro.props;
 
+// Generate canonical URL if not provided
+const canonicalUrl = canonical || `https://ietconnect.org${Astro.url.pathname}`;
+
+// Use ogTitle or fallback to title
+const openGraphTitle = ogTitle || `${title} | IET Connect`;
+
+// Use ogDescription or fallback to description
+const openGraphDescription = ogDescription || description;
+
+// Use ogImage or fallback to heroImage
+const openGraphImage = ogImage || heroImage || 'https://ietconnect.org/assets/img/logo.png';
+
+// Use ogUrl or fallback to canonical
+const openGraphUrl = ogUrl || canonicalUrl;
+---
+<!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} />
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Primary Meta Tags -->
+		<title>{openGraphTitle}</title>
+		<meta name="title" content={openGraphTitle} />
+		<meta name="description" content={description} />
+		{keywords && <meta name="keywords" content={keywords} />}
+		<link rel="canonical" href={canonicalUrl} />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content={ogType} />
+		<meta property="og:url" content={openGraphUrl} />
+		<meta property="og:title" content={openGraphTitle} />
+		<meta property="og:description" content={openGraphDescription} />
+		<meta property="og:image" content={openGraphImage} />
+		<meta property="og:site_name" content="IET Connect" />
+		
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={openGraphUrl} />
+		<meta property="twitter:title" content={openGraphTitle} />
+		<meta property="twitter:description" content={openGraphDescription} />
+		<meta property="twitter:image" content={openGraphImage} />
+		
+		<!-- Favicon -->
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		
+		<!-- JSON-LD Structured Data -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "Article",
+				"headline": title,
+				"image": [openGraphImage],
+				"author": {
+					"@type": "Organization",
+					"name": author
+				},
+				"publisher": {
+					"@type": "Organization",
+					"name": "IET Connect",
+					"logo": {
+						"@type": "ImageObject",
+						"url": "https://ietconnect.org/assets/img/logo.png"
+					}
+				},
+				"datePublished": pubDate.toISOString(),
+				"dateModified": (updatedDate || pubDate).toISOString(),
+				"description": description,
+				"url": canonicalUrl
+			}
+		</script>
+		
 		<style>
+			/* Trivago Header Styles - High Specificity */
+			body .header {
+				background: white !important;
+				border-bottom: 1px solid #e5e5e5;
+				padding: 0 !important;
+				margin: 0 !important;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important;
+			}
+			body .header .header-content {
+				max-width: 1200px;
+				margin: 0 auto;
+				display: flex !important;
+				align-items: center;
+				justify-content: space-between;
+				padding: 12px 20px !important;
+				box-sizing: border-box;
+			}
+			body .header .logo {
+				color: #ff6b35 !important;
+				font-size: 24px !important;
+				font-weight: bold !important;
+				text-decoration: none !important;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important;
+			}
+			body .header .nav {
+				display: flex !important;
+				align-items: center;
+				gap: 32px;
+			}
+			body .header .nav a {
+				color: #666 !important;
+				text-decoration: none !important;
+				font-size: 14px !important;
+				font-weight: 500 !important;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important;
+			}
+			body .header .nav a:hover {
+				color: #333 !important;
+			}
+			body .header .social-icons {
+				display: flex !important;
+				align-items: center;
+				gap: 12px;
+			}
+			body .header .social-icons span {
+				font-size: 12px !important;
+				color: #666 !important;
+				margin-right: 8px;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important;
+			}
+			body .header .social-icon {
+				width: 24px;
+				height: 24px;
+				background: #666;
+				border-radius: 50%;
+				display: inline-block;
+			}
+			
 			main {
 				width: calc(100% - 2em);
 				max-width: 100%;
@@ -21,35 +163,150 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 			}
 			.hero-image {
 				width: 100%;
+				margin-bottom: 2em;
 			}
 			.hero-image img {
 				display: block;
 				margin: 0 auto;
 				border-radius: 12px;
-				box-shadow: var(--box-shadow);
+				box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+				max-width: 100%;
+				height: auto;
 			}
 			.prose {
-				width: 720px;
+				width: 800px;
 				max-width: calc(100% - 2em);
 				margin: auto;
 				padding: 1em;
-				color: rgb(var(--gray-dark));
+				color: #374151;
+				line-height: 1.7;
 			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
+			.article-header {
+				margin-bottom: 2em;
+				padding: 2em 0;
 				text-align: center;
-				line-height: 1;
+				border-bottom: 1px solid #e5e7eb;
 			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
+			.article-header h1 {
+				margin: 0 0 1em 0;
+				font-size: 2.5rem;
+				font-weight: 700;
+				line-height: 1.2;
+				color: #111827;
 			}
-			.date {
+			.article-meta {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 1em;
+				color: #6b7280;
+				font-size: 0.9rem;
+				margin-bottom: 1em;
+			}
+			.article-meta .author {
+				font-weight: 600;
+			}
+			.article-content {
+				font-size: 1.1rem;
+			}
+			.article-content h2 {
+				margin: 2em 0 1em 0;
+				font-size: 1.8rem;
+				font-weight: 600;
+				color: #111827;
+			}
+			.article-content h3 {
+				margin: 1.5em 0 0.8em 0;
+				font-size: 1.4rem;
+				font-weight: 600;
+				color: #374151;
+			}
+			.article-content p {
+				margin-bottom: 1.5em;
+			}
+			.article-content ul, .article-content ol {
+				margin: 1.5em 0;
+				padding-left: 2em;
+			}
+			.article-content li {
 				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
 			}
-			.last-updated-on {
+			.article-content blockquote {
+				border-left: 4px solid #3b82f6;
+				padding-left: 1.5em;
+				margin: 2em 0;
 				font-style: italic;
+				color: #6b7280;
+			}
+			.article-content code {
+				background: #f3f4f6;
+				padding: 0.2em 0.4em;
+				border-radius: 4px;
+				font-size: 0.9em;
+			}
+			.article-content pre {
+				background: #1f2937;
+				color: #f9fafb;
+				padding: 1.5em;
+				border-radius: 8px;
+				overflow-x: auto;
+				margin: 2em 0;
+			}
+			.article-content pre code {
+				background: none;
+				padding: 0;
+			}
+			.cta-section {
+				margin-top: 3em;
+				padding: 2em;
+				background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+				color: white;
+				border-radius: 12px;
+				text-align: center;
+			}
+			.cta-section h3 {
+				margin: 0 0 1em 0;
+				color: white;
+			}
+			.btn {
+				display: inline-block;
+				padding: 0.8em 2em;
+				background: white;
+				color: #3b82f6;
+				text-decoration: none;
+				border-radius: 8px;
+				font-weight: 600;
+				transition: transform 0.2s;
+			}
+			.btn:hover {
+				transform: translateY(-2px);
+			}
+			.tags {
+				margin-top: 2em;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5em;
+				justify-content: center;
+			}
+			.tag {
+				background: #f3f4f6;
+				color: #374151;
+				padding: 0.3em 0.8em;
+				border-radius: 20px;
+				font-size: 0.8rem;
+				font-weight: 500;
+			}
+			@media (max-width: 768px) {
+				.article-header h1 {
+					font-size: 2rem;
+				}
+				.article-meta {
+					flex-direction: column;
+					gap: 0.5em;
+				}
+				.prose {
+					padding: 0.5em;
+				}
 			}
 		</style>
 	</head>
@@ -58,25 +315,52 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<Header />
 		<main>
 			<article>
-				<div class="hero-image">
-					{heroImage && <img width={1020} height={510} src={heroImage} alt="" />}
-				</div>
+				{heroImage && (
+					<div class="hero-image">
+						<img width={1020} height={510} src={heroImage} alt={title} />
+					</div>
+				)}
+				
 				<div class="prose">
-					<div class="title">
-						<div class="date">
+					<header class="article-header">
+						<div class="article-meta">
+							<span class="author">Av {author}</span>
+							<span>•</span>
 							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
+							{updatedDate && (
+								<>
+									<span>•</span>
+									<span>Uppdaterad <FormattedDate date={updatedDate} /></span>
+								</>
+							)}
+							{category && (
+								<>
+									<span>•</span>
+									<span>{category}</span>
+								</>
+							)}
 						</div>
 						<h1>{title}</h1>
-						<hr />
+						<p style="font-size: 1.2rem; color: #6b7280; margin: 0;">{description}</p>
+						
+						{tags && tags.length > 0 && (
+							<div class="tags">
+								{tags.map((tag) => (
+									<span class="tag">{tag}</span>
+								))}
+							</div>
+						)}
+					</header>
+					
+					<div class="article-content">
+						<slot />
 					</div>
-					<slot />
+					
+					<div class="cta-section">
+						<h3>Är du redo att lyfta din IoT-lösning till nya höjder?</h3>
+						<p>Hos IET Connect kombinerar vi högklassig hårdvara, robust mjukvaruarkitektur och AI-drivna insikter för att leverera skräddarsydda lösningar.</p>
+						<a href="/contact" class="btn">Kontakta oss för en demo →</a>
+					</div>
 				</div>
 			</article>
 		</main>

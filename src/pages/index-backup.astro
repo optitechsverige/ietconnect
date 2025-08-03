@@ -1,0 +1,308 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// Featured articles for sidebar (exact from Trivago)
+const featuredArticles = [
+	{ title: "Implementing Data Validation with Great Expectations in Hybrid Environments", date: "25 Apr 2023", readTime: "6 min read" },
+	{ title: "How we scaled our Prometheus setup", date: "23 Aug 2022", readTime: "9 min read" },
+	{ title: "Being on-call as a software engineer - a challenging and fast learning experience", date: "12 Jan 2022", readTime: "8 min read" },
+	{ title: "Java Reactive Programming - Effective Usage in a Real World Application", date: "16 Mar 2021", readTime: "15 min read" },
+	{ title: "Learn Redis the hard way (in production)", date: "25 Jan 2017", readTime: "18 min read" }
+];
+
+// Popular tags (exact from Trivago)
+const popularTags = ['github', 'java', 'automation', 'monitoring', 'open source', 'data'];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title="Tech at trivago" description="trivago's latest tech articles and regular tech tips straight to your inbox!" />
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+				margin: 0;
+				padding: 0;
+				background: #ffffff;
+				color: #333;
+				line-height: 1.5;
+			}
+			
+			/* Header styles */
+			.header {
+				background: white;
+				border-bottom: 1px solid #e5e5e5;
+				padding: 0;
+			}
+			.header-content {
+				max-width: 1200px;
+				margin: 0 auto;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 12px 20px;
+			}
+			.logo {
+				color: #ff6b35;
+				font-size: 24px;
+				font-weight: bold;
+				text-decoration: none;
+			}
+			.nav {
+				display: flex;
+				align-items: center;
+				gap: 32px;
+			}
+			.nav a {
+				color: #666;
+				text-decoration: none;
+				font-size: 14px;
+				font-weight: 500;
+			}
+			.nav a:hover {
+				color: #333;
+			}
+			.social-icons {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.social-icons span {
+				font-size: 12px;
+				color: #666;
+				margin-right: 8px;
+			}
+			.social-icon {
+				width: 24px;
+				height: 24px;
+				background: #666;
+				border-radius: 50%;
+				display: inline-block;
+			}
+			
+			/* Main content */
+			.main-container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 40px 20px;
+				display: grid;
+				grid-template-columns: 1fr 300px;
+				gap: 60px;
+			}
+			
+			/* Hero article */
+			.hero-article {
+				background: linear-gradient(135deg, #4ECDC4 0%, #FF8C42 100%);
+				border-radius: 8px;
+				padding: 0;
+				margin-bottom: 60px;
+				overflow: hidden;
+				position: relative;
+				min-height: 400px;
+				display: flex;
+				align-items: center;
+			}
+			.hero-content {
+				padding: 60px;
+				flex: 1;
+			}
+			.hero-title {
+				font-size: 48px;
+				font-weight: 900;
+				line-height: 1.1;
+				margin: 0 0 20px 0;
+				color: #333;
+				max-width: 500px;
+			}
+			.hero-tag {
+				background: #007bff;
+				color: white;
+				padding: 4px 12px;
+				border-radius: 16px;
+				font-size: 12px;
+				font-weight: 600;
+				display: inline-block;
+				margin-bottom: 20px;
+			}
+			.hero-description {
+				font-size: 16px;
+				line-height: 1.6;
+				color: #555;
+				margin-bottom: 20px;
+				max-width: 500px;
+			}
+			.hero-meta {
+				font-size: 14px;
+				color: #666;
+			}
+			.hero-illustration {
+				flex: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 40px;
+			}
+			.computer-illustration {
+				width: 300px;
+				height: 200px;
+				background: #87CEEB;
+				border-radius: 20px;
+				position: relative;
+				border: 4px solid #333;
+			}
+			.computer-screen {
+				background: #333;
+				margin: 20px;
+				height: 120px;
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: #FFD700;
+				font-size: 24px;
+				font-weight: bold;
+			}
+			.computer-stand {
+				width: 80px;
+				height: 20px;
+				background: #87CEEB;
+				border: 2px solid #333;
+				border-radius: 10px;
+				margin: 10px auto 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- Header -->
+		<header class="header">
+			<div class="header-content">
+				<a href="/" class="logo">trivago</a>
+				<nav class="nav">
+					<a href="/">Tech at trivago</a>
+					<a href="/topics">Topics ▼</a>
+					<a href="/about">About</a>
+					<a href="/careers">Careers</a>
+					<a href="/open-source">Open Source</a>
+				</nav>
+				<div class="social-icons">
+					<span>Follow us:</span>
+					<a href="#" class="social-icon" title="Twitter"></a>
+					<a href="#" class="social-icon" title="GitHub"></a>
+					<a href="#" class="social-icon" title="Facebook"></a>
+					<a href="#" class="social-icon" title="RSS"></a>
+				</div>
+			</div>
+		</header>
+
+		<!-- Main Content -->
+		<div class="main-container">
+			<main>
+				<!-- Hero Article -->
+				<article class="hero-article">
+					<div class="hero-content">
+						<span class="hero-tag">automation</span>
+						<h1 class="hero-title">Implementing Data Validation with Great Expectations in Hybrid Environments</h1>
+						<p class="hero-description">
+							Learn how we implemented comprehensive data validation using Great Expectations 
+							in our hybrid cloud infrastructure to ensure data quality across multiple environments.
+						</p>
+						<div class="hero-meta">
+							By <strong>Sarah Chen</strong> • 25 Apr 2023 • 6 min read
+						</div>
+					</div>
+					<div class="hero-illustration">
+						<div class="computer-illustration">
+							<div class="computer-screen">DATA</div>
+							<div class="computer-stand"></div>
+						</div>
+					</div>
+				</article>
+
+				<!-- Latest Articles Section -->
+				<section>
+					<div class="section-header">
+						<h2 class="section-title">Latest articles</h2>
+						<a href="/blog" class="see-all">See all</a>
+					</div>
+					
+					<div class="articles-grid">
+						{posts.slice(0, 3).map((post) => (
+							<article class="article-card">
+								<div class="article-image blue">
+									<div class="article-illustration">💻</div>
+								</div>
+								<div class="article-content">
+									<div class="article-tags">
+										{post.data.tags && post.data.tags.slice(0, 2).map((tag) => (
+											<span class="tag">{tag}</span>
+										))}
+									</div>
+									<h3 class="article-title">{post.data.title}</h3>
+									<p class="article-excerpt">{post.data.description}</p>
+									<div class="article-meta">
+										By <strong>{post.data.author || 'IET Connect Team'}</strong> • 
+										{new Date(post.data.pubDate).toLocaleDateString('en-US', { 
+											year: 'numeric', 
+											month: 'short', 
+											day: 'numeric' 
+										})} • 8 min read
+									</div>
+								</div>
+							</article>
+						))}
+					</div>
+				</section>
+			</main>
+
+			<!-- Sidebar -->
+			<aside class="sidebar">
+				<!-- Featured Articles -->
+				<section class="sidebar-section">
+					<h3>Featured articles</h3>
+					{featuredArticles.map((article) => (
+						<div class="featured-article">
+							<a href="#">
+								<h4>{article.title}</h4>
+								<div class="featured-meta">{article.date} • {article.readTime}</div>
+							</a>
+						</div>
+					))}
+				</section>
+
+				<!-- Popular Tags -->
+				<section class="sidebar-section">
+					<h3>Popular tags</h3>
+					<div class="tags-grid">
+						{popularTags.map((tag) => (
+							<a href={`/tags/${tag}`} class="tag-item">{tag}</a>
+						))}
+						<div class="see-all-tags">
+							<a href="/tags" class="see-all">See all tags</a>
+						</div>
+					</div>
+				</section>
+
+				<!-- Career Section -->
+				<section class="sidebar-section">
+					<div class="career-section">
+						<h3>Join our team</h3>
+						<p>We're always looking for talented engineers to join our team and help us build the future of travel technology.</p>
+						<a href="/careers" class="career-cta">View open positions →</a>
+					</div>
+				</section>
+			</aside>
+		</div>
+
+		<Footer />
+	</body>
+</html>

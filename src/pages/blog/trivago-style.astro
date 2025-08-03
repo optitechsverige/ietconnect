@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 
@@ -410,7 +409,26 @@ const popularTags = ['github', 'java', 'automation', 'monitoring', 'open source'
 		</style>
 	</head>
 	<body>
-		<Header />
+		<!-- Header -->
+		<header class="header">
+			<div class="header-content">
+				<a href="/" class="logo">trivago</a>
+				<nav class="nav">
+					<a href="/">Tech at trivago</a>
+					<a href="/topics">Topics ▼</a>
+					<a href="/about">About</a>
+					<a href="/careers">Careers</a>
+					<a href="/opensource">Open Source</a>
+				</nav>
+				<div class="social-icons">
+					<span>Follow us on</span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+					<span class="social-icon"></span>
+				</div>
+			</div>
+		</header>
 
 		<div class="main-container">
 			<main>
